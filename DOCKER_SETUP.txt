@@ -1,0 +1,175 @@
+# Docker Setup for PD Portal
+
+## ✅ What's Been Set Up
+
+Your PostgreSQL database is now fully containerized with Docker. No more WSL PostgreSQL needed!
+
+### Files Created:
+- `docker-compose.yml` - Main Docker configuration
+- `docker-manager.ps1` - PowerShell management script (Windows)
+- `docker-manager.sh` - Bash management script (macOS/Linux)
+- `.dockerignore` - Docker build exclusions
+
+### SQL Files Organized:
+- Moved to `backend/database/` for better organization
+- Auto-run on container startup in the correct order:
+  1. `01-schema.sql` - Creates all tables and extensions
+  2. `02-seeds.sql` - Inserts default tags and admin user
+  3. `03-progression-tables.sql` - Adds gamification tables
+  4. `04-constraints.sql` - Adds constraints and indexes
+
+## 🚀 Quick Start
+
+### Windows (PowerShell):
+```powershell
+# Start everything
+.\docker-manager.ps1 start
+
+# Stop
+.\docker-manager.ps1 stop
+
+# View status
+.\docker-manager.ps1 status
+
+# View logs
+.\docker-manager.ps1 logs
+```
+
+### macOS/Linux (Bash):
+```bash
+# Start everything
+./docker-manager.sh start
+
+# Stop
+./docker-manager.sh stop
+
+# View status
+./docker-manager.sh status
+
+# View logs
+./docker-manager.sh logs
+```
+
+## 📋 Available Commands
+
+| Command | Description |
+|---------|-------------|
+| `start` | Start all Docker containers |
+| `stop` | Stop all containers |
+| `restart` | Restart all containers |
+| `status` | Show container status |
+| `logs` | Show PostgreSQL logs in real-time |
+| `shell` | Open PostgreSQL command-line shell |
+| `pgadmin` | Start pgAdmin (UI database manager) at http://localhost:5050 |
+| `clean` | ⚠️ Delete containers AND database (careful!) |
+| `backup` | Create a database backup (PowerShell only) |
+| `restore` | Restore database from backup (PowerShell only) |
+
+## 🔧 Database Connection
+
+Your `.env` file already has the correct settings:
+```
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=pd_portal
+DB_USER=postgres
+DB_PASSWORD=postgres
+```
+
+**No changes needed!** The Node.js backend will automatically connect.
+
+## 📦 What's Running
+
+### PostgreSQL Container
+- Image: `postgres:15-alpine` (lightweight)
+- Database: `pd_portal`
+- User: `postgres` / Password: `postgres`
+- Port: `5432` (mapped from container)
+- Data persists in Docker volume `postgres_data`
+
+### pgAdmin (Optional)
+- Access at: http://localhost:5050
+- Email: `admin@example.com`
+- Password: `admin`
+- Use to browse/manage database visually
+
+## 🔄 Workflow
+
+1. **Start Docker once:**
+   ```powershell
+   .\docker-manager.ps1 start
+   ```
+
+2. **Run your backend normally:**
+   ```bash
+   cd backend
+   npm install
+   npm run dev
+   ```
+
+3. **Run your frontend normally:**
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+
+4. **Stop when done:**
+   ```powershell
+   .\docker-manager.ps1 stop
+   ```
+
+## 💾 Database Backups
+
+### Create Backup (Windows):
+```powershell
+.\docker-manager.ps1 backup
+# Creates: postgres_backup_YYYYMMDD_HHMMSS.sql
+```
+
+### Restore from Backup (Windows):
+```powershell
+.\docker-manager.ps1 restore postgres_backup_20231117_120000.sql
+```
+
+## 🐛 Troubleshooting
+
+### "Docker is not running"
+- Start Docker Desktop (Windows/macOS) or Docker daemon (Linux)
+
+### "Port 5432 already in use"
+- Stop the current container: `.\docker-manager.ps1 stop`
+- Or change port in `docker-compose.yml` (left number: `5433:5432`)
+
+### "Cannot connect to database"
+- Check PostgreSQL is healthy: `.\docker-manager.ps1 status`
+- View logs: `.\docker-manager.ps1 logs`
+- Wait 5-10 seconds after starting (initialization takes time)
+
+### Database empty after restart?
+- This is normal! Docker volumes persist data between restarts
+- Use `clean` command only if you want to reset everything
+
+### Want to view database GUI?
+```powershell
+.\docker-manager.ps1 pgadmin
+# Then go to http://localhost:5050
+```
+
+## 📝 Next Steps
+
+1. Ensure Docker Desktop is installed
+2. Run `.\docker-manager.ps1 start`
+3. Backend will auto-connect to PostgreSQL
+4. Continue development as normal!
+
+## ❌ Removing WSL PostgreSQL
+
+Once everything works, you can uninstall PostgreSQL from WSL:
+```bash
+# In WSL terminal
+sudo apt remove postgresql
+sudo apt remove postgresql-*
+```
+
+Your data is now safely in Docker! 🐳

@@ -1,0 +1,2 @@
+-- Constraints already defined in schema.sql
+-- These are kept for reference but shouldn't be needed

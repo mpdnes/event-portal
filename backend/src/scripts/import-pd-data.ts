@@ -171,7 +171,7 @@ async function importPDData() {
 
     // Parse all .docx files
     console.log('\n📄 Parsing PD session files...');
-    const pdDir = '/mnt/c/users/mdono/documents/work/programs/pd';
+    const pdDir = process.env.PD_DOCS_DIR || './docs/pd-sessions';
     const files = fs.readdirSync(pdDir).filter(f => f.endsWith('.docx') && !f.startsWith('~'));
 
     let successCount = 0;
